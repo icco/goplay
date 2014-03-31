@@ -2,18 +2,30 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
-type Hello struct{}
-
-func (h Hello) ServeHTTP(
-	w http.ResponseWriter,
-	r *http.Request) {
-	fmt.Fprint(w, "Hello!")
+type Handler struct {
+	Data string
 }
 
+func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, h.Data)
+}
+
+func Hello() Handler {
+	return Handler{"Hello"}
+}
+
+func String(s string) Handler {
+	return Handler{s}
+}
+
+// http://golang.org/pkg/net/http/
 func main() {
-	var h Hello
-	http.ListenAndServe("localhost:4000", h)
+	http.Handle("/string", String("I'm a frayed knot."))
+	http.Handle("/", Hello())
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
